@@ -144,8 +144,7 @@ def RevenueGraph():       #https://www.datapine.com/kpi-examples-and-templates/c
             return 0
         year = int(input("Please Enter a year to Calculate Income And Expenses--->"))
         if year < 2003 or year > 2019:
-            print("Reports can only be generated from 2003. Please try again")
-            print("Our reports generated only for a whole year, so 2020 cannot be produced yet")
+            print("Income and Expenses Reports can only be generated from 2003. Please try again")
             return
         CalculateIncomeAndExpensesByYear(year)
         file = open('important.dat', 'rb')
@@ -175,22 +174,38 @@ def Graph_Capacity():       #https://www.slideteam.net/project-status-kpi-dashbo
     if num_of_courses == 0:  # if the #courses.txt is empty but exist,
         print("Please add employee first")
         return 0
-    array = [None]*num_of_courses
-    namescourses = [None]*num_of_courses
+    num = int(input("Please Enter a year to View Capacity--->"))
+    if num < 2003 or num > 2019:
+        print("Income and Expenses Reports can only be generated from 2003. Please try again")
+        return
     zumzum = BuildDict()
-    for index in range(0, num_of_courses):
-        namescourses[index] = zumzum[index]['course name']
-        array[index] = int(zumzum[index]['course capacity'])
+    couresnames = []
+    couresescapacity = []
+    dicts = [{'month': {}} for k in range(12)]
+    for i in range(0, 12):
+        dicts[i]['month'] = i + 1
+    for i in range(num_of_courses):
+        str1 = str(zumzum[i]['course date'])
+        year = " "
+        for index in range(0, 4):
+            year = str(year) + str(str1[index])
+        year = int(year)
+        if year == num:
+            month = " "
+            for index in range(5, 7):
+                month = str(month) + str(str1[index])
+            couresnames.append(zumzum[i]['course name'])
+            couresescapacity.append(int(zumzum[i]['course capacity']))
     barWidth = 0.2
-    bars1 = [Max_Capacity] * num_of_courses
-    r1 = np.arange(num_of_courses)
+    bars1 = [Max_Capacity] * len(couresnames)
+    r1 = np.arange(len(couresnames))
     r2 = [x + barWidth for x in r1]
     plt.bar(r1, bars1, width=barWidth, color='blue', edgecolor='black', capsize=7, label='Max capacity')
-    plt.bar(r2, array, width=barWidth, color='cyan', edgecolor='black', capsize=7, label='Course capacity')
-    plt.xticks([r +  barWidth for r in range(num_of_courses)], namescourses, fontsize = 4.7)
-    plt.title("Course Capacity KPI ", fontsize=20, fontweight=0, color='green')
-    plt.ylabel('Capacity of courses', fontsize = 15)
-    plt.xlabel("Name of courses", fontsize = 15)
+    plt.bar(r2, couresescapacity, width=barWidth, color='cyan', edgecolor='black', capsize=7, label='Course capacity')
+    plt.xticks([r + barWidth for r in range(len(couresnames))], couresnames, fontsize=4.7)
+    plt.title("Capacity by courses for: " + str(num), fontsize=15, fontweight=0, color='green')
+    plt.ylabel('Capacity of courses', fontsize=15)
+    plt.xlabel("Name of courses", fontsize=15)
     plt.legend()
     plt.show()
 
@@ -329,6 +344,24 @@ def CheckFullName(str):
         print("please enter only letters")
         return False
 
+def checkEmploDuplicated(num):
+    zumzum = Buildmatrix()
+    num = int(num)
+    count = int(NumOfEmployee() / 6)
+    for i in range(0,count):
+        if num == int(zumzum[i][0]):
+            return False
+    return True
+
+def checkcourseduplicated(num):
+    zumzum = BuildDict()
+    num = int(num)
+    num_of_courses = int(NumOfcourses() / 4)
+    for i in range(0,num_of_courses):
+        if num == int(zumzum[i]["course id"]):
+            return False
+    return True
+
 def Gender():
     try:
         ans = 0
@@ -360,7 +393,7 @@ def CheckCourseID(num):
 
 def CheckCapacity(num):
     num = int(num)
-    if num < Max_Capacity and num >= 0:
+    if num <= Max_Capacity and num >= 0:
         return True
     else:
         print("Invalid Capacity Course, Please try again capacity between 0-30")
@@ -488,6 +521,7 @@ def AddEmployee():        #add employee to file text
     chID = False
     chPN = False
     chFN = False
+    Flag = False
     try:
         print("welcome to Add Employees")
         id = open('employee.txt', 'a+')
@@ -500,6 +534,12 @@ def AddEmployee():        #add employee to file text
             employee_id = input('Please enter ID number---> ')
             x = int(employee_id)
             chID = CheckID(employee_id)
+            Flag = checkEmploDuplicated(x)
+            if Flag == False:
+                print("Employee ID exist")
+                break
+            else:
+                Flag = True
             chage = False
             if chID == True:
                 chID = True
@@ -637,45 +677,49 @@ def AddCourse():
         id = open('courses.txt', 'a+')
         num_of_courses = int(NumOfcourses()/4)
         while ans != 0:
+            capacity_flag = False
+            Flag2 = False
+            Flag = False
+            Flag3 = False
             print("Current number of courses: ", z + num_of_courses)
             print('Enter details course number: ', i + num_of_courses)
             i = i + 1
             z = z + 1
-            course_name = input("Please Enter course name--->")
-            Flag = CheckFullName(course_name)
-            if Flag == False:
-                return
+            while Flag == False:
+                course_name = input("Please Enter course name--->")
+                Flag = CheckFullName(course_name)
             year = int(input('Enter a year--->'))
-            if year < 2003 and year > 2022:
-                print("Details can be entered afterwards, but from 2003, Date of purchase of John Bryce by MATRIX, try again")
-                return
+            while year < 2003 and year > 2022:
+                if year < 2003 and year > 2022:
+                    print("Details can be entered afterwards, but from 2003, Date of purchase of John Bryce by MATRIX, try again")
+                    year = int(input('Enter a year--->'))
             month = int(input('Enter a month--->'))
-            if month < 1 or month > 12:
-                print("Please try again with MONTH between 1-12")
-                return
+            while month < 1 or month > 12:
+                if month < 1 or month > 12:
+                    print("Please try again with MONTH between 1-12")
+                    month = int(input('Enter a month--->'))
             date1 = datetime.date(year, month, 1)
-            course_capacity = int(input("Please Enter course capacity ( 30 Max) --->"))
-            capacity_flag = CheckCapacity(course_capacity)
-            if capacity_flag == False:
-                return
-            course_id = input("Please Enter course id ( 4 Digits )--->")
-            Flag2 = CheckCourseID(course_id)
-            if Flag2 == True:
-                dicts = {'course name': course_name, 'course id': course_id, 'course capacity': course_capacity, 'course date': date1}
-                print("Welcome ", course_name, " your course ID is: ", course_id, "date:", date1)
-                ans = int(input('To continue adding course please press 1. for exit press 0. ---> '))
-                for items in dicts.values():
-                    items = str(items)
-                    id.write(items + '\n')
-            else:
-                print("The Course ID length need to be 4 digits")
-                return      #if course id!=5
-            id.close()
+            while capacity_flag == False:
+                course_capacity = int(input("Please Enter course capacity ( 30 Max) --->"))
+                capacity_flag = CheckCapacity(course_capacity)
+            while Flag2 == False or Flag3 == False:
+                course_id = input("Please Enter course id ( 4 Digits )--->")
+                Flag3 = checkcourseduplicated(course_id)
+                if Flag3 == False:
+                    print("Course ID exist")
+                Flag2 = CheckCourseID(course_id)
+            dicts = {'course name': course_name, 'course id': course_id, 'course capacity': course_capacity, 'course date': date1}
+            print("Welcome ", course_name, " your course ID is: ", course_id, "date:", date1)
+            ans = int(input('To continue adding course please press 1. for exit press 0. ---> '))
+            for items in dicts.values():
+                items = str(items)
+                id.write(items + '\n')
+        id.close()
     except IOError:
         print('Error occurred while trying to read the source file. THE FILE JUST CREATED.')
         num_of_courses = 0
     except ValueError:
-        print('Please enter only numbers.' + '\n', 'Month only between 1-12')    #check
+        print('Please enter only numbers.' + '\n', 'Month only between 1-12')
 
 def DeleteCourse():
     try:
@@ -709,7 +753,7 @@ def DeleteCourse():
         else:
             return                  # Course ID != 4
     except ValueError:
-        print('Please enter numbers only' + '\n')
+        print('Please enter numbers only')
     except FileNotFoundError:
         print("File does not exist, add course first")
 
@@ -798,7 +842,7 @@ def UpdateCapacity():
         else:
             return  # Course ID != 4
     except ValueError:
-        print('Please enter numbers only' + '\n')
+        print('Please enter numbers only')
     except FileNotFoundError:
         print("File does not exist, add course first")
 
